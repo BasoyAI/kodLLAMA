@@ -102,7 +102,7 @@ def categorize_sentences(sentences, headings):
 
 def process_text(uploaded_file):
     # Dosyadan metni okuma
-    if uploaded_file.type == "audio/mpeg" or "video/mp4":
+    if uploaded_file.type == ("audio/mpeg" or "video/mp4"):
         temp_file_path = ""
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(uploaded_file.read())
