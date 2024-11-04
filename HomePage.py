@@ -2,6 +2,7 @@ import streamlit as st
 from TextCategorize import process_text
 from annotated_text import annotated_text
 import random
+import http
 
 # Benzersiz renk oluşturma fonksiyonu
 def generate_unique_colors(n):

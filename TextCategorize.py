@@ -1,7 +1,11 @@
+import json
+
 from ollama import chat
 import re
 from PyPDF2 import PdfReader
 from docx import Document
+import transcript
+import tempfile
 
 def read_text_from_file(uploaded_file):
     file_type = uploaded_file.name.split(".")[-1].lower()
@@ -51,6 +55,29 @@ def generate_headings(text):
     
     return cleaned_headings
 
+def categorize_sentences_audio(sentences, headings):
+    categorized_dict = {title: [] for title in headings}
+    categorized_dict["none"] = []
+
+    for sentence in sentences:
+        messages = [
+            {
+                'role': 'user',
+                #'role': 'system',
+                'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence["translated_text"]}" Headings: {", ".join(headings)}'
+            },
+        ]
+        response = chat('llama3.2', messages=messages)
+        chosen_title = response['message']['content'].strip()
+
+        if chosen_title in headings:
+            sentence["heading"] = chosen_title
+        else:
+            sentence["heading"] = "None"
+            print(f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence['translated_text']}'")
+
+    return sentences
+
 def categorize_sentences(sentences, headings):
     categorized_dict = {title: [] for title in headings}
     categorized_dict["none"] = []
@@ -75,15 +102,38 @@ def categorize_sentences(sentences, headings):
 
 def process_text(uploaded_file):
     # Dosyadan metni okuma
-    text = read_text_from_file(uploaded_file)
-    
-    # Cümlelere ayırma ve başlık oluşturma
-    sentences = split_into_sentences(text)
-    headings = generate_headings(text)
-    categorized_dict = categorize_sentences(sentences, headings)
-    
-    return {
-        "categorized_dict": categorized_dict,
-        "sentences": sentences,
-        "raw_text": text  # Ham metni kaydetme
-    }
+    if uploaded_file.type == "audio/mpeg" or "video/mp4":
+        temp_file_path = ""
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(uploaded_file.read())
+            temp_file_path = temp_file.name
+        sentences = transcript.process_file(temp_file_path)
+
+        text = ""
+        for sentence in sentences:
+            text += sentence["translated_text"] + " "
+
+        headings = generate_headings(text)
+        updated_sentences = categorize_sentences_audio(sentences, headings)
+
+        result = {
+            "categorized_dict": updated_sentences,
+            "sentences": sentences,
+            "raw_text": text  # Ham metni kaydetme
+        }
+
+        print(json.dumps(result, ensure_ascii=False, indent=4))
+        return result
+    else:
+        text = read_text_from_file(uploaded_file)
+
+        # Cümlelere ayırma ve başlık oluşturma
+        sentences = split_into_sentences(text)
+        headings = generate_headings(text)
+        categorized_dict = categorize_sentences(sentences, headings)
+
+        return {
+            "categorized_dict": categorized_dict,
+            "sentences": sentences,
+            "raw_text": text  # Ham metni kaydetme
+        }

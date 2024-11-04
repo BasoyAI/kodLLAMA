@@ -1,10 +1,11 @@
 import re
-from googletrans import Translator
+from google_trans_new import google_translator
+from deep_translator import GoogleTranslator
 import PyPDF2
 from docx import Document
 
 # Initialize the translator
-translator = Translator()
+translator = google_translator()
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_path):
@@ -43,8 +44,8 @@ def translate_long_text(text, src_lang='tr', dest_lang='en'):
     return ' '.join(translated_chunks)
 
 def translate_text(text, src_lang='tr', dest_lang='en'):
-    tt = translator.translate(text, src=src_lang, dest=dest_lang)
-    return tt.text
+    tt = GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
+    return tt
 
 # Main function to handle the full process
 def translate_document(input_file, file_type):

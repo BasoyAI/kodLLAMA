@@ -17,7 +17,7 @@ def convert_to_mp3(file_path):
 
 # Function to transcribe with Whisper
 def transcribe_audio(file_path) -> list:
-    model = whisper.load_model("base")
+    model = whisper.load_model("small")
     result = model.transcribe(file_path)
     transcriptions = []
 
@@ -46,6 +46,8 @@ def process_file(file_path):
     # Output the transcription with timestamps
     for line in transcription:
         print(line)
+
+    return transcription
 
 
 def format_transcript(file_path) -> list[dict]:
@@ -92,9 +94,3 @@ def format_transcript(file_path) -> list[dict]:
                     current_start = segment["start"]
 
     return final_sentences
-
-
-# Example usage
-print(translate.translate_text("Hayvanlar için hayatlarını tehlikeye atmaya hazır insanlar var.", "tr", "en"))
-file_path = "test_audio.mp3"  # Change to the uploaded file path
-process_file(file_path)
