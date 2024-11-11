@@ -90,7 +90,7 @@ from difflib import get_close_matches
 def categorize_sentences(sentences, headings):
     categorized_dict = {title: [] for title in headings}
     categorized_dict["none"] = []
-    
+    print(headings)
     for sentence in sentences:
         messages = [
             {
@@ -129,13 +129,15 @@ def process_text(uploaded_file, promptText):
         for sentence in sentences:
             text += sentence["translated_text"] + " "
 
-        headings = generate_headings(text)
+        headings = generate_headings(text, promptText)
         updated_sentences = categorize_sentences_audio(sentences, headings)
 
         result = {
             "categorized_dict": updated_sentences,
             "sentences": sentences,
-            "raw_text": text  # Ham metni kaydetme
+            "raw_text": text,  # Ham metni kaydetme
+            "headings": headings,
+            "type": "audio"
         }
 
         print(json.dumps(result, ensure_ascii=False, indent=4))
@@ -151,5 +153,7 @@ def process_text(uploaded_file, promptText):
         return {
             "categorized_dict": categorized_dict,
             "sentences": sentences,
-            "raw_text": text  # Ham metni kaydetme
+            "raw_text": text,  # Ham metni kaydetme
+            "headings": headings,
+            "type": "text_file"
         }
