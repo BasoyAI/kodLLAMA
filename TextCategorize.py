@@ -96,7 +96,7 @@ def categorize_sentences(sentences, headings):
             {
                 'role': 'user',
                 'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence}" Headings: {", ".join(headings)}'
-            },
+            },  # ['Biopreserver'] Bio-preserver int
         ]
         response = chat('llama3.2', messages=messages)
         chosen_title = response['message']['content'].strip()

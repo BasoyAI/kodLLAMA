@@ -1,0 +1,5 @@
+streamlit~=1.39.0
+pypdf2~=3.0.1
+docx~=0.2.4
+moviepy~=1.0.3
+ollama~=0.3.3
