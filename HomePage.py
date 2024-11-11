@@ -2,13 +2,12 @@ import streamlit as st
 from TextCategorize import process_text
 from annotated_text import annotated_text
 import random
-import http
 
 # Benzersiz renk oluşturma fonksiyonu
 def generate_unique_colors(n):
     colors = set()
     while len(colors) < n:
-        color = "#{:06x}".format(random.randint(0, 0xFFFFFF))  # Rastgele bir HEX renk oluştur
+        color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
         colors.add(color)
     return list(colors)
 
@@ -23,15 +22,15 @@ if not st.session_state["show_result"]:
 
     # Dosya yükleme alanı
     uploaded_file = st.file_uploader("Bir dosya yükleyin", type=["pdf", "docx", "txt", "mp3", "mp4"])
-
+    prompt_text = st.text_area("Enter your prompt here")
     # İşlem butonu
     if st.button("Kategorize Et"):
         if uploaded_file is not None:
             # Dosyayı işleyip başlık ve cümleleri kategorize etme
-            result = process_text(uploaded_file)
+            result = process_text(uploaded_file, prompt_text)
             st.session_state["categorized_result"] = result["categorized_dict"]
             st.session_state["sentences"] = result["sentences"]
-            st.session_state["show_result"] = True  # Sonuç sayfasına geçmek için durumu güncelleme
+            st.session_state["show_result"] = True
         else:
             st.write("Lütfen bir dosya yükleyin.")
 
@@ -54,20 +53,24 @@ else:
         # Başlık ve renkleri eşleştirmek için bir sözlük oluşturma
         title_colors = {}
         for i, (title, color) in enumerate(zip(categorized_result.keys(), unique_colors), 1):
-            title_label = str(i)  # Başlık numarasını label olarak kullan
-            title_colors[title] = (color, title_label)  # Başlığa renk ve numara ata
-            annotated_text((title, title_label, color))  # Başlık ve label olarak numara göster
+            title_label = str(i)
+            title_colors[title] = (color, title_label)
+            annotated_text((title, title_label, color))
 
     with col2:
         st.subheader("Orijinal Metin")
 
-        # Cümleleri ilgili başlıkların rengi ve numarasıyla vurgulamak için Annotated Text kullanma
+        # Sıralı şekilde cümleleri vurgulamak için dizin oluştur
         highlighted_sentences = []
-        
-        for title, sentences in categorized_result.items():
-            color, label = title_colors[title]  # Başlığın rengini ve numarasını al
-            for sentence in sentences:
-                highlighted_sentences.append((sentence, label, color))  # Cümleyi başlığın rengi ve numarasıyla ekle
-        
+
+        # st.session_state["sentences"] sıralamasına göre cümleleri vurgulama
+        for sentence in st.session_state["sentences"]:
+            # Hangi başlığa ait olduğunu bul
+            for title, sentences in categorized_result.items():
+                if sentence in sentences:
+                    color, label = title_colors[title]
+                    highlighted_sentences.append((sentence, label, color))
+                    break
+
         # Cümleleri tek satır halinde göster
         annotated_text(*highlighted_sentences)

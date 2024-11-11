@@ -6,6 +6,8 @@ from PyPDF2 import PdfReader
 from docx import Document
 import transcript
 import tempfile
+from difflib import get_close_matches
+
 
 def read_text_from_file(uploaded_file):
     file_type = uploaded_file.name.split(".")[-1].lower()
@@ -33,12 +35,17 @@ def split_into_sentences(text):
     sentences = re.split(r'(?<=[.!?]) +', text.strip())
     return sentences
 
-def generate_headings(text):
+def generate_headings(text, promptText):
     messages = [
         {
             'role': 'user',
-            #'role': 'system',
-            'content': f'You are a bot that analyzes customer complaints. Your task is to categorize the complaints into headings. Review the text and generate appropriate headings based on the content. Do not create subheadings. Headings should be a maximum of 5 words. Provide only the headings as feedback. Do not order them by numbers. The content is: "{text}"'
+            'content': (
+                "You are a bot that analyzes texts. Your task is to generate suitable titles for the provided text. "
+                "You need to analyze the text and create the most appropriate titles. Do not generate any subtitles. "
+                "Each title should be no more than five words. Please provide only the titles as output. "
+                "Do not number them or add any comments. "
+                f"The topic of the provided text and your task is as follows: '{promptText}', and the text is as follows: '{text}'."
+            )
         },
     ]
     
@@ -78,29 +85,38 @@ def categorize_sentences_audio(sentences, headings):
 
     return sentences
 
+from difflib import get_close_matches
+
 def categorize_sentences(sentences, headings):
     categorized_dict = {title: [] for title in headings}
     categorized_dict["none"] = []
+    
     for sentence in sentences:
         messages = [
             {
                 'role': 'user',
-                #'role': 'system',
                 'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence}" Headings: {", ".join(headings)}'
             },
         ]
         response = chat('llama3.2', messages=messages)
         chosen_title = response['message']['content'].strip()
-
-        if chosen_title in categorized_dict:
-            categorized_dict[chosen_title].append(sentence)
+        
+        # Find the closest matching heading
+        closest_match = get_close_matches(chosen_title, headings, n=1, cutoff=0.6)
+        
+        if closest_match:
+            # Use the closest match if found
+            matched_heading = closest_match[0]
+            categorized_dict[matched_heading].append(sentence)
         else:
-            categorized_dict["none"].append("Choosen Title: " + chosen_title + ", sentence: " + sentence)
+            # If no close match is found, categorize under "none"
+            categorized_dict["none"].append(f"Chosen Title: {chosen_title}, sentence: {sentence}")
             print(f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence}'")
 
     return categorized_dict
 
-def process_text(uploaded_file):
+
+def process_text(uploaded_file, promptText):
     # Dosyadan metni okuma
     if uploaded_file.type == ("audio/mpeg" or "video/mp4"):
         temp_file_path = ""
@@ -129,7 +145,7 @@ def process_text(uploaded_file):
 
         # Cümlelere ayırma ve başlık oluşturma
         sentences = split_into_sentences(text)
-        headings = generate_headings(text)
+        headings = generate_headings(text, promptText)
         categorized_dict = categorize_sentences(sentences, headings)
 
         return {
