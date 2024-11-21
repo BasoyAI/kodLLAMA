@@ -35,6 +35,27 @@ def split_into_sentences(text):
     sentences = re.split(r'(?<=[.!?]) +', text.strip())
     return sentences
 
+def generate_subheading(text, promptText, heading, headings):
+    messages = [
+        {
+            'role': 'user',
+            'content': (
+                "You are a bot that analyzes texts. Your task is to generate suitable subtitle for the provided text. "
+                "You need to analyze the text and create the most appropriate subtitle. "
+                "Each title should be no more than five words. Please provide only the subtite as output. "
+                "Do not add number to subtitle or add any comments. "
+                f"You can not create the same with any of these titles: {", ".join(headings)}."
+                f"You must create a relative subtitle with the main title and text. The main title is: '{heading}'"
+                f"The topic of the provided text and your task is as follows: '{promptText}', and the text is as follows: '{text}'."
+            )
+        },
+    ]
+
+    response = chat('llama3.2', messages=messages)
+    created_subtitle = response['message']['content'].strip()
+    headings[heading].append(created_subtitle)
+    return created_subtitle
+
 def generate_headings(text, promptText):
     messages = [
         {
@@ -53,14 +74,20 @@ def generate_headings(text, promptText):
     headings = response['message']['content'].strip().split("\n")
     headings = [heading.strip() for heading in headings if heading.strip()]
 
-    cleaned_headings = []
+    # Sözlük oluşturma
+    cleaned_headings = {}
     for heading in headings:
+        # Eğer başlık numaralı ise numarayı kaldır
         if len(heading) >= 3 and heading[0].isdigit() and heading[1] == '.' and heading[2] == ' ':
-            cleaned_headings.append(heading[3:])
+            heading_name = heading[3:]
         else:
-            cleaned_headings.append(heading)
-    
+            heading_name = heading
+        
+        # Dictionary'e başlık ve boş bir liste ekle
+        cleaned_headings[heading_name] = []
+
     return cleaned_headings
+
 
 def categorize_sentences_audio(sentences, headings):
     categorized_dict = {title: [] for title in headings}
@@ -88,28 +115,34 @@ def categorize_sentences_audio(sentences, headings):
 from difflib import get_close_matches
 
 def categorize_sentences(sentences, headings):
-    categorized_dict = {title: [] for title in headings}
+    # headings sözlüğündeki anahtarları alıyoruz
+    heading_keys = list(headings.keys())
+
+    # Başlıkları boş bir listeyle başlatıyoruz
+    categorized_dict = {title: [] for title in heading_keys}
     categorized_dict["none"] = []
-    print(headings)
+    
+    print(heading_keys)
+    
     for sentence in sentences:
         messages = [
             {
                 'role': 'user',
-                'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence}" Headings: {", ".join(headings)}'
-            },  # ['Biopreserver'] Bio-preserver int
+                'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence}" Headings: {", ".join(heading_keys)}'
+            },
         ]
         response = chat('llama3.2', messages=messages)
         chosen_title = response['message']['content'].strip()
         
-        # Find the closest matching heading
-        closest_match = get_close_matches(chosen_title, headings, n=1, cutoff=0.6)
+        # En yakın eşleşen başlığı bul
+        closest_match = get_close_matches(chosen_title, heading_keys, n=1, cutoff=0.6)
         
         if closest_match:
-            # Use the closest match if found
+            # En yakın eşleşme bulunduysa bunu kullan
             matched_heading = closest_match[0]
             categorized_dict[matched_heading].append(sentence)
         else:
-            # If no close match is found, categorize under "none"
+            # Eğer eşleşme bulunmazsa "none" kategorisine ekle
             categorized_dict["none"].append(f"Chosen Title: {chosen_title}, sentence: {sentence}")
             print(f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence}'")
 
