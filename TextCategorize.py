@@ -88,32 +88,41 @@ def categorize_sentences_audio(sentences, headings):
 from difflib import get_close_matches
 
 def categorize_sentences(sentences, headings):
+    heading_indices = {str(i): heading for i, heading in enumerate(headings)}
+    # index_to_heading = {v: k for k, v in heading_indices.items()}
     categorized_dict = {title: [] for title in headings}
     categorized_dict["none"] = []
-    print(headings)
+
+    print(f"Headings: {headings}")
+    print(f"Indexed Headings: {heading_indices}")
+
     for sentence in sentences:
         messages = [
             {
                 'role': 'user',
-                'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence}" Headings: {", ".join(headings)}'
-            },  # ['Biopreserver'] Bio-preserver int
+                'content': (
+                    "Choose the index of the heading that this sentence fits. "
+                    "You will see the headings below, but you must respond with only the index of the heading. "
+                    "Do not make any comments or write other characters. "
+                    f"Sentence: \"{sentence}\" "
+                    f"Headings: {json.dumps(heading_indices)}"
+                )
+            },
         ]
         response = chat('llama3.2', messages=messages)
-        chosen_title = response['message']['content'].strip()
-        
-        # Find the closest matching heading
-        closest_match = get_close_matches(chosen_title, headings, n=1, cutoff=0.6)
-        
-        if closest_match:
-            # Use the closest match if found
-            matched_heading = closest_match[0]
+        chosen_index = response['message']['content'].strip()
+
+        # Check if the index returned by the model is valid
+        if chosen_index in heading_indices:
+            matched_heading = heading_indices[chosen_index]
             categorized_dict[matched_heading].append(sentence)
         else:
-            # If no close match is found, categorize under "none"
-            categorized_dict["none"].append(f"Chosen Title: {chosen_title}, sentence: {sentence}")
-            print(f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence}'")
+            # If the model returns an invalid index, add it to the "none" category.
+            categorized_dict["none"].append(f"Chosen Index: {chosen_index}, Sentence: {sentence}")
+            print(f"Error: Index '{chosen_index}' not found. Could not categorize sentence: '{sentence}'")
 
     return categorized_dict
+
 
 
 def process_text(uploaded_file, promptText):
