@@ -110,7 +110,29 @@ def find_sentences_with_sub(sentence_list, heading_list, heading_index, language
     # Filter the sentences that match the parent index or any of its subheadings
     return [sentence[language] for sentence in sentence_list if sentence["heading"] in subheading_indices]
 
+def convert_index_for_ai(heading_list):
+    """
+    Converts the hierarchical index of headings to a flat sequential index for AI processing.
 
+    Args:
+        heading_list (dict): Original headings dictionary with hierarchical indices.
+
+    Returns:
+        dict: New headings dictionary with sequential indices.
+    """
+    # Initialize a new dictionary to store the transformed headings
+    new_headings = {}
+
+    # Use an incremental counter for the new indices
+    counter = 1
+
+    # Iterate through the original headings in order
+    for _, heading_name in sorted(heading_list.items()):
+        # Assign a new sequential index to each heading
+        new_headings[str(counter)] = heading_name
+        counter += 1
+
+    return new_headings
 
 
 
@@ -131,3 +153,6 @@ if __name__ == "__main__":
     # Test the function find_sentences_with_sub
     print("Sentences with heading '1' and its subheadings:", find_sentences_with_sub(sentences_list, headings,"1"))
 
+    # Test the function convert_index_for_ai
+    new_headings = convert_index_for_ai(headings)
+    print(new_headings)
