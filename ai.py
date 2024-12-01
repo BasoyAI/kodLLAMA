@@ -72,3 +72,5 @@ def categorize_sentences(sentences, headings: dict):
             print(f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence['translated_text']}'")
 
     return sentences
+
+

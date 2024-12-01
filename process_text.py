@@ -36,9 +36,9 @@ def split_into_sentences(text):
 
     sentences = re.split(r'(?<=[.!?]) +', text.strip())
     final_sentences = []
-    for sentence in sentences:
+    for i, sentence in enumerate(sentences):
         translated_text = translate.translate_text(sentence, "tr", "en")
-        final_sentences.append({"start": None, "end": None, "text": sentence,
+        final_sentences.append({"id":i, "start": None, "end": None, "text": sentence,
                                             "translated_text": translated_text})
 
     return final_sentences

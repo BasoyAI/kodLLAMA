@@ -85,7 +85,7 @@ def format_transcript(file_path) -> list[dict]:
                 # Append the completed sentence to the final list
                 print(current_sentence.strip())
                 translated_text = translate.translate_text(current_sentence.strip(), "tr", "en")
-                final_sentences.append({"start": current_start, "end": end_time, "text": current_sentence.strip(),
+                final_sentences.append({"id": j, "start": current_start, "end": end_time, "text": current_sentence.strip(),
                                         "translated_text": translated_text})
                 # Reset for the next sentence
                 current_sentence = ""

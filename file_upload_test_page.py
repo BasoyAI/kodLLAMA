@@ -1,7 +1,6 @@
 import streamlit as st
-from ai import process_file_ai
 from annotated_text import annotated_text
-
+import app
 
 
 # Başlık durumunu kontrol etmek için session_state kullanıyoruz
@@ -20,13 +19,13 @@ if not st.session_state["show_result"]:
     if st.button("Kategorize Et"):
         if uploaded_file is not None:
             # Dosyayı işleyip başlık ve cümleleri kategorize etme
-            result = process_file_ai(uploaded_file, prompt_text)
-            st.session_state["categorized_result"] = result["categorized_dict"]
-            st.session_state["sentences"] = result["sentences"]
+            app.process_file(uploaded_file, prompt_text)
+            st.session_state["categorized_result"] = app.processed_out["categorized_dict"]
+            st.session_state["sentences"] = app.processed_out["sentences"]
             st.session_state["show_result"] = True
-            st.session_state["headings"] = result["headings"]
-            st.session_state["file_type"] = result["type"]
-            st.session_state["raw_translated_text"] = result["raw_translated_text"]
+            st.session_state["headings"] = app.processed_out["headings"]
+            st.session_state["file_type"] = app.processed_out["type"]
+            st.session_state["raw_translated_text"] = app.processed_out["raw_translated_text"]
             st.session_state["promptText"] = prompt_text
 
         else:

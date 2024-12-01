@@ -3,27 +3,34 @@ import json
 import transcript
 import tempfile
 import process_text
+import heading_system
 
 prompt = ""
 uploaded_file = None
 headings = None
-processed_out = None
-
+processed_out = {
+            "categorized_dict": None,
+            "sentences": None,
+            "raw_translated_text": None,  # Ham metni kaydetme
+            "headings": None,
+            "type": None
+        }
 
 def generate_subheading_(parent_heading_index):
-    new_subheading_code = headingSystems(parent_heading_index)
+    new_subheading_index = heading_system.generate_heading_index(headings,parent_heading_index)
     parent_heading_value = headings[parent_heading_index]
-    new_subheading_value = generate_subheading(headingSystems.get_sentences_only_at(parent_heading_code).join, prompt, parent_heading_value, headings)
+    new_subheading_value = generate_subheading(heading_system.find_sentences(processed_out["sentences"], parent_heading_index), prompt, parent_heading_value, headings)
     
-    headings[new_subheading_code] = new_subheading_value
+    headings[new_subheading_index] = new_subheading_value
     headings_buffer = headings = {
         0: parent_heading_value,
         1: new_subheading_value,
     }
-
-    only_parent_heading_texts = headingSystems.get_sentences_at_only(parent_heading_code)
-    categorize_sentences(only_parent_heading_texts, headings_buffer)
-
+    only_parent_heading_texts = heading_system.find_sentences(processed_out["sentences"], parent_heading_index)
+    process_buffer = []
+    process_buffer = categorize_sentences(only_parent_heading_texts, headings_buffer)
+    processed_out = heading_system.change_sentence_hedings(processed_out, process_buffer)
+    #rerun front-end
 
 #process_file_ai buraya taşı
 def process_file(uploaded_file_, prompt_text):
@@ -70,10 +77,9 @@ def process_file(uploaded_file_, prompt_text):
         }
 
 
-
     print("Kategorize Sonuçları")
     print("-----------------------")
-    print(json.dump(processed_out))
+    print(json.dumps(processed_out, ensure_ascii=False, indent=4))
     '''
     print(processed_out["categorized_dict"])
     print("-----------------------")
