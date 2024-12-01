@@ -59,30 +59,25 @@ def generate_heading_index(heading_list, parent_index=None):
             # If no top-level headings exist, start with "1"
             return "1"
 
-def find_sentences(sentence_list, heading_list, heading_index, language="text"):
+def find_sentences(sentence_list, heading_index, language="text"):
     """
     Finds all sentences in the sentence_list with the specified heading_index.
 
     Args:
         sentence_list (list): List of sentence dictionaries.
-        heading_list (dict): Dictionary containing heading hierarchy.
         heading_index (str): The heading index to match.
         language (str): Specifies which text to retrieve ('text' or 'translated_text').
 
     Returns:
         list: List of texts that match the heading_index in the specified language.
     """
-    # Get the heading name from the heading list
-    heading_name = heading_list.get(heading_index)
-    if not heading_name:
-        return []
-
     # Validate the language parameter
     if language not in ["text", "translated_text"]:
         raise ValueError("Invalid language parameter. Use 'text' or 'translated_text'.")
 
-    # Filter the sentences that match the heading name
-    return [sentence[language] for sentence in sentence_list if sentence["heading"] == heading_name]
+    # Filter the sentences that match the heading index
+    return [sentence[language] for sentence in sentence_list if sentence["heading"] == heading_index]
+
 
 
 def find_sentences_with_sub(sentence_list, heading_list, heading_index, language="text"):
@@ -92,24 +87,29 @@ def find_sentences_with_sub(sentence_list, heading_list, heading_index, language
 
     Args:
         sentence_list (list): List of sentence dictionaries.
-        heading_list (dict): Dictionary containing heading hierarchy.
+        headings (dict): Dictionary containing heading hierarchy.
         heading_index (str): The parent heading index to match, including subheadings.
         language (str): Specifies which text to retrieve ('text' or 'translated_text').
 
     Returns:
         list: List of texts that match the heading_index or its subheadings in the specified language.
+        :param language:
+        :param heading_index:
+        :param sentence_list:
+        :param heading_list:
     """
-    # Get the names of the parent heading and all its subheadings
-    subheading_names = [
-        name for key, name in heading_list.items() if key.startswith(heading_index)
-    ]
-
     # Validate the language parameter
     if language not in ["text", "translated_text"]:
         raise ValueError("Invalid language parameter. Use 'text' or 'translated_text'.")
 
-    # Filter the sentences that match any of these names
-    return [sentence[language] for sentence in sentence_list if sentence["heading"] in subheading_names]
+    # Find all subheadings under the parent index
+    subheading_indices = [
+        key for key in heading_list.keys() if key.startswith(heading_index)
+    ]
+
+    # Filter the sentences that match the parent index or any of its subheadings
+    return [sentence[language] for sentence in sentence_list if sentence["heading"] in subheading_indices]
+
 
 
 
@@ -126,8 +126,8 @@ if __name__ == "__main__":
     print("Next index under '1.2':", generate_heading_index(headings, "1.2"))  # Expected output: "1.2.2"
 
     # Test the function find_sentences
-    print("Sentences with heading '1.2':", find_sentences(sentences_list, headings,"1.2"))
+    print("Sentences with heading '1':", find_sentences(sentences_list,"1"))
 
     # Test the function find_sentences_with_sub
-    print("Sentences with heading '1.2' and its subheadings:", find_sentences_with_sub(sentences_list, headings,"1.2"))
+    print("Sentences with heading '1' and its subheadings:", find_sentences_with_sub(sentences_list, headings,"1"))
 
