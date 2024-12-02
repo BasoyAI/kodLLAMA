@@ -29,10 +29,10 @@ def generate_subheading_(parent_heading_index):
         0: parent_heading_value,
         1: new_subheading_value,
     }
-    only_parent_heading_texts = heading_system.find_sentences(processed_out["sentences"], parent_heading_index)
-    process_buffer = []
-    process_buffer = categorize_sentences(only_parent_heading_texts, headings_buffer)
-    processed_out = heading_system.change_sentence_hedings(processed_out, process_buffer)
+    only_parent_heading_texts = heading_system.find_sentences_as_objects(processed_out["sentences"], parent_heading_index)
+    sentences_buffer = []
+    sentences_buffer = categorize_sentences(only_parent_heading_texts, headings_buffer)
+    processed_out["sentences"] = heading_system.change_sentence_headings(processed_out["sentences"], sentences_buffer)
     headings = heading_system.sort_headings(headings)
 
     #rerun front-end

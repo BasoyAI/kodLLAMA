@@ -69,7 +69,7 @@ def categorize_sentences(sentences, headings: dict):
         chosen_index = next((index for index, title in headings.items() if title == chosen_title), None)
 
         if chosen_index:
-            sentence["heading"] = chosen_index  # Assign the index instead of the title
+            sentence["heading"] = str(chosen_index)  # Assign the index instead of the title
         else:
             sentence["heading"] = "None"  # Handle unmatched headings
             print(

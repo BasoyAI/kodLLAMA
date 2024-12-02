@@ -159,10 +159,20 @@ def sort_headings(heading_list):
         dict: A new dictionary with headings sorted by their hierarchical keys.
     """
     # Sort the dictionary keys using natural sorting for hierarchical structure
-    sorted_keys = sorted(heading_list.keys(), key=lambda x: list(map(int, x.split("."))))
+    sorted_keys = sorted(heading_list.keys(), key=lambda x: list(map(int, str(x).split(".")))) #bug fixed here. (str(x).split("."))
 
     # Create a new dictionary with sorted keys
     sorted_headings = {key: heading_list[key] for key in sorted_keys}
 
     return sorted_headings
+
+
+def change_sentence_headings(main_sentences_list, buffer_sentences_list):
+    for sentence in main_sentences_list:
+        for buf_sentence in buffer_sentences_list:
+            if sentence["id"] == buf_sentence["id"]:
+                #sentence.update(buf_sentence)
+                sentence["heading"] = buf_sentence["heading"]  
+    
+    return main_sentences_list
 

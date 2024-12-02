@@ -33,6 +33,7 @@ def show_headings(colored_headings):
         with col1:
             if(st.button(" -- ",key=heading)):
                 app.generate_subheading_(heading)
+                generate_colored_headings(app.headings)
                 st.rerun()
             
         with col2:
@@ -54,7 +55,7 @@ def get_color_by_heading_id(colored_headings, heading_id):
 def show_text(colored_headings, sentences):
     for sentence in sentences:
         sentence_color = get_color_by_heading_id(colored_headings, sentence["heading"])
-        annotated_text((sentence["text"], sentence["heading"], sentence_color))
+        annotated_text((sentence["text"], str(sentence["heading"]), sentence_color))
 
 
 # Başlık durumunu kontrol etmek için session_state kullanıyoruz
