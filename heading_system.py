@@ -1,6 +1,4 @@
 # Import the test data from app.py
-#from app import headings, sentences_list
-
 def get_subheadings(parent_index, heading_list):
     """
     Retrieves all subheadings under a given parent index.
@@ -134,36 +132,37 @@ def convert_index_for_ai(heading_list):
 
     return new_headings
 
+def find_sentences_as_objects(sentence_list, heading_index):
+    """
+    Finds all sentences in the sentence_list with the specified heading_index,
+    returning them as structured objects.
 
-def change_sentence_hedings(main_sentences_list, buffer_sentences_list):
-    for sentence in main_sentences_list:
-        for buf_sentence in buffer_sentences_list:
-            if sentence["id"] == buf_sentence["id"]:
-                #sentence.update(buf_sentence)
-                sentence["heading"] = buf_sentence["heading"]  
-    
-    return main_sentences_list
+    Args:
+        sentence_list (list): List of sentence dictionaries.
+        heading_index (str): The heading index to match.
+
+    Returns:
+        list: List of sentence dictionaries that match the heading_index.
+    """
+    # Filter the sentences that match the heading index
+    return [sentence for sentence in sentence_list if sentence["heading"] == heading_index]
 
 
+def sort_headings(heading_list):
+    """
+    Sorts a dictionary of headings by their hierarchical keys.
 
+    Args:
+        heading_list (dict): Dictionary containing heading indices and their corresponding titles.
 
-# Example usage for testing
-if __name__ == "__main__":
-    # Test the function get_subheadings
-    result = get_subheadings("1", headings)
-    print("Subheadings under '1.2':", result)
+    Returns:
+        dict: A new dictionary with headings sorted by their hierarchical keys.
+    """
+    # Sort the dictionary keys using natural sorting for hierarchical structure
+    sorted_keys = sorted(heading_list.keys(), key=lambda x: list(map(int, x.split("."))))
 
-    # Test the function generate_heading_index
-    print("Next top-level index:", generate_heading_index(headings))  # Expected output: "2"
-    print("Next index under '1':", generate_heading_index(headings, "1"))  # Expected output: "1.4"
-    print("Next index under '1.2':", generate_heading_index(headings, "1.2"))  # Expected output: "1.2.2"
+    # Create a new dictionary with sorted keys
+    sorted_headings = {key: heading_list[key] for key in sorted_keys}
 
-    # Test the function find_sentences
-    print("Sentences with heading '1':", find_sentences(sentences_list,"1"))
+    return sorted_headings
 
-    # Test the function find_sentences_with_sub
-    print("Sentences with heading '1' and its subheadings:", find_sentences_with_sub(sentences_list, headings,"1"))
-
-    # Test the function convert_index_for_ai
-    new_headings = convert_index_for_ai(headings)
-    print(new_headings)

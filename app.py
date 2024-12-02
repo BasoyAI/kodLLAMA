@@ -7,7 +7,7 @@ import heading_system
 
 prompt = ""
 uploaded_file = None
-headings = []
+headings = None
 processed_out = {
             "categorized_dict": {},
             "sentences": [],
@@ -17,6 +17,9 @@ processed_out = {
         }
 
 def generate_subheading_(parent_heading_index):
+    global processed_out
+    global prompt
+    global headings
     new_subheading_index = heading_system.generate_heading_index(headings,parent_heading_index)
     parent_heading_value = headings[parent_heading_index]
     new_subheading_value = generate_subheading(heading_system.find_sentences(processed_out["sentences"], parent_heading_index), prompt, parent_heading_value, headings)
@@ -30,11 +33,15 @@ def generate_subheading_(parent_heading_index):
     process_buffer = []
     process_buffer = categorize_sentences(only_parent_heading_texts, headings_buffer)
     processed_out = heading_system.change_sentence_hedings(processed_out, process_buffer)
+    headings = heading_system.sort_headings(headings)
+
     #rerun front-end
 
 #process_file_ai buraya taşı
 def process_file(uploaded_file_, prompt_text):
     global processed_out
+    global prompt
+    global headings
     prompt = prompt_text
     uploaded_file = uploaded_file_
 
@@ -76,6 +83,7 @@ def process_file(uploaded_file_, prompt_text):
             "headings": headings,
             "type": "text_file"
         }
+    headings = heading_system.sort_headings(headings)
 
 
     print("Kategorize Sonuçları")

@@ -9,7 +9,7 @@ def generate_subheading(text, promptText, heading, headings: dict):
                 "You need to analyze the text and create the most appropriate subtitle. "
                 "Each title should be no more than five words. Please provide only the subtite as output. "
                 "Do not add number to subtitle or add any comments. "
-                f"You can not create the same with any of these titles: {", ".join(headings.values)}."
+                f"You can not create the same with any of these titles: {", ".join(headings.values())}."
                 f"You must create a relative subtitle with the main title and text. The main title is: '{heading}'"
                 f"The topic of the provided text and your task is as follows: '{promptText}', and the text is as follows: '{text}'."
             )
