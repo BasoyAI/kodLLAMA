@@ -25,7 +25,7 @@ def generate_subheading_(parent_heading_index):
     new_subheading_value = generate_subheading(heading_system.find_sentences(processed_out["sentences"], parent_heading_index), prompt, parent_heading_value, headings)
     
     headings[new_subheading_index] = new_subheading_value
-    headings_buffer = headings = {
+    headings_buffer = {
         0: parent_heading_value,
         1: new_subheading_value,
     }

@@ -1,4 +1,5 @@
 from ollama import chat
+import json
 
 def generate_subheading(text, promptText, heading, headings: dict):
     messages = [
@@ -53,28 +54,40 @@ def generate_headings(text, promptText):
     return cleaned_headings
 
 
-def categorize_sentences(sentences, headings: dict):
+def categorize_sentences(sentences, headings):
+    heading_indices = {str(i): heading for i, heading in enumerate(headings.values())}
+
+    print(f"Headings: {headings}")
+    print(f"Indexed Headings: {heading_indices}")
+
     for sentence in sentences:
-        # Prepare the AI prompt with heading names
         messages = [
             {
                 'role': 'user',
-                'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence["translated_text"]}" Headings: {", ".join(headings.values())}'
+                'content': (
+                    "Choose the index of the heading that this sentence fits. "
+                    "You will see the headings below, but you must respond with only the index of the heading. "
+                    "Do not make any comments or write other characters.\n\n "
+                    f"Sentence: \"{sentence["translated_text"]}\" \n"
+                    f"Headings: {json.dumps(heading_indices)}"
+                )
             },
         ]
         response = chat('llama3.2', messages=messages)
-        chosen_title = response['message']['content'].strip()
-
-        # Find the corresponding index for the chosen title
-        chosen_index = next((index for index, title in headings.items() if title == chosen_title), None)
-
-        if chosen_index:
-            sentence["heading"] = str(chosen_index)  # Assign the index instead of the title
+        chosen_index = response['message']['content'].strip()
+        print(f"message is:  {messages}  \n  response is: {response}")
+        # Check if the index returned by the model is valid
+        if chosen_index in heading_indices:
+            matched_heading = heading_indices[chosen_index]
+            index = None
+            for key, value in headings.items(): #TODO: change this
+                if value == matched_heading:
+                    index = key
+            sentence["heading"] = str(index)
         else:
-            sentence["heading"] = "None"  # Handle unmatched headings
-            print(
-                f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence['translated_text']}'")
-
+            # If the model returns an invalid index, add it to the "none" category.
+            print(f"Error: Index '{chosen_index}' not found. Could not categorize sentence: '{sentence}'")
+            sentence["heading"] = None
     return sentences
 
 
