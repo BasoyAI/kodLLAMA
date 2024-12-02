@@ -1,6 +1,6 @@
 import re
 import whisper
-from moviepy.editor import VideoFileClip
+import moviepy
 import os
 import translate
 
@@ -8,7 +8,7 @@ import translate
 # Function to convert MP4 to MP3
 def convert_to_mp3(file_path):
     if file_path.endswith('.mp4'):
-        clip = VideoFileClip(file_path)
+        clip = moviepy.editor.VideoFileClip(file_path)
         mp3_path = file_path.replace('.mp4', '.mp3')
         clip.audio.write_audiofile(mp3_path)
         return mp3_path
