@@ -150,6 +150,23 @@ def find_sentences_as_objects(sentence_list, heading_index):
     return [sentence for sentence in sentence_list if sentence["heading"] == heading_index]
 
 
+def sort_headings(heading_list):
+    """
+    Sorts a dictionary of headings by their hierarchical keys.
+
+    Args:
+        heading_list (dict): Dictionary containing heading indices and their corresponding titles.
+
+    Returns:
+        dict: A new dictionary with headings sorted by their hierarchical keys.
+    """
+    # Sort the dictionary keys using natural sorting for hierarchical structure
+    sorted_keys = sorted(heading_list.keys(), key=lambda x: list(map(int, x.split("."))))
+
+    # Create a new dictionary with sorted keys
+    sorted_headings = {key: heading_list[key] for key in sorted_keys}
+
+    return sorted_headings
 
 
 # Example usage for testing
@@ -173,6 +190,20 @@ if __name__ == "__main__":
     new_headings = convert_index_for_ai(headings)
     print(new_headings)
 
-    # Test the function the find_sentences_as_objects
+    # Test the function find_sentences_as_objects
     result = find_sentences_as_objects(sentences_list, "1.1")
     print(result)
+
+    # Test the function sort_heading
+    test_headings = {
+        "1": "Autism Spectrum Savants Misunderstood",
+        "1.2": "Chimpanzee Intelligence Exceeds Human",
+        "1.1.1": "Cognitive Strengths of Autistic Individuals",
+        "1.1": "Chimpanzee Intelligence Exceeds Human",
+        "2.1": "Test Heading 2",
+        "2": "Test Heading 1",
+    }
+
+    # Sort the headings
+    sorted_headings = sort_headings(test_headings)
+    print(sorted_headings)
