@@ -139,8 +139,8 @@ def convert_index_for_ai(heading_list):
 # Example usage for testing
 if __name__ == "__main__":
     # Test the function get_subheadings
-    result = get_subheadings("1", headings)
-    print("Subheadings under '1.2':", result)
+    result = get_subheadings("1.1", headings)
+    print("Subheadings under '1.1':", result)
 
     # Test the function generate_heading_index
     print("Next top-level index:", generate_heading_index(headings))  # Expected output: "2"

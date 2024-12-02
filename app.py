@@ -1,6 +1,7 @@
 # Example sentences list for testing
 sentences_list = [
     {
+        "id": 0,
         "start": "00:00:00",
         "end": "00:00:09",
         "text": "Mesela zeka çeşitliliği ile neuro çeşitlilik epey örtüşen havramlar oradan girerim konuya.",
@@ -8,6 +9,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 1,
         "start": "00:00:09",
         "end": "00:00:11",
         "text": "Otizm spektrumunda olanları düşünelim.",
@@ -15,6 +17,7 @@ sentences_list = [
         "heading": "None"
     },
     {
+        "id": 2,
         "start": "00:00:11",
         "end": "00:00:13",
         "text": "Rainpan diye bir film vardı hatırlıyor musunuz?",
@@ -22,6 +25,7 @@ sentences_list = [
         "heading": "1"
     },
     {
+        "id": 3,
         "start": "00:00:13",
         "end": "00:00:18",
         "text": "Onun yüzünden bir nesil otistiklerin süper kabiliyetler olduğuna inanarak yetişmişti.",
@@ -29,6 +33,7 @@ sentences_list = [
         "heading": "1"
     },
     {
+        "id": 4,
         "start": "00:00:18",
         "end": "00:00:21",
         "text": "Gerçekte ezeci çoğunluğu savant değiller.",
@@ -36,6 +41,7 @@ sentences_list = [
         "heading": "1"
     },
     {
+        "id": 5,
         "start": "00:00:21",
         "end": "00:00:24",
         "text": "Ama kolay anlaşıldığı için savantları örnek olarak kullanabiliriz.",
@@ -43,6 +49,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 6,
         "start": "00:00:24",
         "end": "00:00:31",
         "text": "Bir çok bilistel eksiği bulunan ama bir iki dar alanda akıl alma seviyede yetenekli olan insanlar bu savantlar.",
@@ -50,6 +57,7 @@ sentences_list = [
         "heading": "1"
     },
     {
+        "id": 7,
         "start": "00:00:31",
         "end": "00:00:35",
         "text": "E peki onları aptal veya akıllı diye tek bir etikete sığdırabilir miyiz hakikaten?",
@@ -57,6 +65,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 8,
         "start": "00:00:35",
         "end": "00:00:40",
         "text": "Bazı insanlar var mesela hayal güçleri çok aktif olduğu için hiçbir şey okuyup dinleyemiyorlar.",
@@ -64,6 +73,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 9,
         "start": "00:00:40",
         "end": "00:00:46",
         "text": "Cümleli ortasında o şey kafalarında canlandırıp yarattıkları bu gerçekçi dünyanın içinde kayboluyorlar.",
@@ -71,6 +81,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 10,
         "start": "00:00:46",
         "end": "00:00:53",
         "text": "Bir romancı için çok değerli bir yetenek, bir sinemacı için ama herhangi bir sınavda başarılı olmanıza engelliyor.",
@@ -78,6 +89,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 11,
         "start": "00:00:53",
         "end": "00:00:55",
         "text": "IQ testlerini tamamlamanı dengeliyor doğal olarak.",
@@ -85,6 +97,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 12,
         "start": "00:00:55",
         "end": "00:00:57",
         "text": "Bu insanlara da mı aptal diyeceğiz?",
@@ -92,6 +105,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 13,
         "start": "00:00:57",
         "end": "00:00:58",
         "text": "Yaut hayvanlar.",
@@ -99,6 +113,7 @@ sentences_list = [
         "heading": "1"
     },
     {
+        "id": 14,
         "start": "00:00:58",
         "end": "00:01:01",
         "text": "YouTube'da tonla deney var şempanzeler hakkında.",
@@ -106,6 +121,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 15,
         "start": "00:01:01",
         "end": "00:01:03",
         "text": "Ekranda bir sürü rakamı aynı anda görüyorlar mesela.",
@@ -113,6 +129,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 16,
         "start": "00:01:03",
         "end": "00:01:07",
         "text": "Sonra sayıların üstü kapatılıyor ve doğru sırayı hatırlamaları isteniyor.",
@@ -120,6 +137,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 17,
         "start": "00:01:07",
         "end": "00:01:11",
         "text": "Hayvan bakın rakamları öğrenmiş, deneyin amacını anlamış.",
@@ -127,6 +145,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 18,
         "start": "00:01:11",
         "end": "00:01:14",
         "text": "Bunlar yetmiyormuş gibi çatır çutur üç saniyede çözüyor hepsini.",
@@ -134,6 +153,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 19,
         "start": "00:01:14",
         "end": "00:01:19",
         "text": "Ben ise müthişseki insanlığı temsilen ilk üç rakamdan sonrasını hatırlamıyorum bile.",
@@ -141,6 +161,7 @@ sentences_list = [
         "heading": "1.1"
     },
     {
+        "id": 20,
         "start": "00:01:19",
         "end": "00:01:23",
         "text": "Deneyin koordinatör de öyle 20 kez denemiş bir kez başarılı olmuş anlatıyor.",
