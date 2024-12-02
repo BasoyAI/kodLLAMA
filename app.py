@@ -7,13 +7,13 @@ import heading_system
 
 prompt = ""
 uploaded_file = None
-headings = None
+headings = []
 processed_out = {
-            "categorized_dict": None,
-            "sentences": None,
-            "raw_translated_text": None,  # Ham metni kaydetme
-            "headings": None,
-            "type": None
+            "categorized_dict": {},
+            "sentences": [],
+            "raw_translated_text": "", 
+            "headings": {},
+            "type": ""
         }
 
 def generate_subheading_(parent_heading_index):
@@ -34,6 +34,7 @@ def generate_subheading_(parent_heading_index):
 
 #process_file_ai buraya taşı
 def process_file(uploaded_file_, prompt_text):
+    global processed_out
     prompt = prompt_text
     uploaded_file = uploaded_file_
 

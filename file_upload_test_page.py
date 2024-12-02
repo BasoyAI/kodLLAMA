@@ -11,7 +11,6 @@ if "show_result" not in st.session_state:
 if not st.session_state["show_result"]:
     # Streamlit arayüzü
     st.title("Metin Kategorize Uygulaması")
-
     # Dosya yükleme alanı
     uploaded_file = st.file_uploader("Bir dosya yükleyin", type=["pdf", "docx", "txt", "mp3", "mp4"])
     prompt_text = st.text_area("Enter your prompt here")
