@@ -134,6 +134,22 @@ def convert_index_for_ai(heading_list):
 
     return new_headings
 
+def find_sentences_as_objects(sentence_list, heading_index):
+    """
+    Finds all sentences in the sentence_list with the specified heading_index,
+    returning them as structured objects.
+
+    Args:
+        sentence_list (list): List of sentence dictionaries.
+        heading_index (str): The heading index to match.
+
+    Returns:
+        list: List of sentence dictionaries that match the heading_index.
+    """
+    # Filter the sentences that match the heading index
+    return [sentence for sentence in sentence_list if sentence["heading"] == heading_index]
+
+
 
 
 # Example usage for testing
@@ -156,3 +172,7 @@ if __name__ == "__main__":
     # Test the function convert_index_for_ai
     new_headings = convert_index_for_ai(headings)
     print(new_headings)
+
+    # Test the function the find_sentences_as_objects
+    result = find_sentences_as_objects(sentences_list, "1.1")
+    print(result)
