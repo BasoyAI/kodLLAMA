@@ -55,21 +55,25 @@ def generate_headings(text, promptText):
 
 def categorize_sentences(sentences, headings: dict):
     for sentence in sentences:
+        # Prepare the AI prompt with heading names
         messages = [
             {
                 'role': 'user',
-                #'role': 'system',
                 'content': f'Choose one heading that this sentence fits. Your response must be only the heading that you choose. Do not make any comments or write other characters. Sentence: "{sentence["translated_text"]}" Headings: {", ".join(headings.values())}'
             },
         ]
         response = chat('llama3.2', messages=messages)
         chosen_title = response['message']['content'].strip()
 
-        if chosen_title in headings.values():
-            sentence["heading"] = chosen_title
+        # Find the corresponding index for the chosen title
+        chosen_index = next((index for index, title in headings.items() if title == chosen_title), None)
+
+        if chosen_index:
+            sentence["heading"] = chosen_index  # Assign the index instead of the title
         else:
-            sentence["heading"] = "None"
-            print(f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence['translated_text']}'")
+            sentence["heading"] = "None"  # Handle unmatched headings
+            print(
+                f"Error: Heading '{chosen_title}' not found. Could not categorize sentence: '{sentence['translated_text']}'")
 
     return sentences
 
