@@ -30,6 +30,8 @@ def show_headings(colored_headings):
         
 
         with col1:
+            if dot_counter == 0:
+                st.divider()
             with st.popover(""):
                 text_input_key = str(heading) + "_text_input"
                 subheader_prompt = st.text_input("Alt başlık promptu giriniz.", key=text_input_key)
