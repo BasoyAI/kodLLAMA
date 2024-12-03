@@ -24,12 +24,11 @@ def show_headings(colored_headings):
         heading_color = colored_headings[heading][1]
         translated_heading_value = translate.translate_text(heading_value, src_lang='en', dest_lang='tr')
         dot_counter = heading.count(".")
-        indent_string_value = "-" * dot_counter*2
+        indent_string_value = "-" * dot_counter*3
         indent_string_value += ">"
         heading_front_end_value = heading + ". " + translated_heading_value
         
-        if dot_counter == 0:
-            st.divider()
+
         with col1:
             if(st.button(" -- ",key=heading)):
                 app.generate_subheading_(heading)
@@ -37,6 +36,8 @@ def show_headings(colored_headings):
                 st.rerun()
             
         with col2:
+            if dot_counter == 0:
+                st.divider()
             annotated_text(
                 indent_string_value,
                 annotation(heading_front_end_value, heading, heading_color),
