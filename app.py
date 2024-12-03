@@ -79,6 +79,10 @@ def process_file(uploaded_file_, prompt_text):
 
         # Cümlelere ayırma ve başlık oluşturma
         sentences = process_text.split_into_sentences(text)
+
+        text = ""
+        for sentence in sentences:
+            text += sentence["translated_text"] + " "
         headings = generate_headings(text, prompt)
         categorized_dict = categorize_sentences(sentences, headings)
 

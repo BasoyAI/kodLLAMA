@@ -7,10 +7,11 @@ import translate
 
 def random_color():
     return "#{:06x}".format(random.randint(0, 0xFFFFFF))
-    
+
+
 def generate_colored_headings(headings):
     colored_headings = {
-        key: [value, random_color()] 
+        key: [value, random_color()]
         for key, value in headings.items()
     }
 
@@ -24,10 +25,9 @@ def show_headings(colored_headings):
         heading_color = colored_headings[heading][1]
         translated_heading_value = translate.translate_text(heading_value, src_lang='en', dest_lang='tr')
         dot_counter = heading.count(".")
-        indent_string_value = "-" * dot_counter*3
+        indent_string_value = "-" * dot_counter * 3
         indent_string_value += ">"
         heading_front_end_value = heading + ". " + translated_heading_value
-        
 
         with col1:
             if dot_counter == 0:
@@ -35,12 +35,13 @@ def show_headings(colored_headings):
             with st.popover(""):
                 text_input_key = str(heading) + "_text_input"
                 subheader_prompt = st.text_input("Alt başlık promptu giriniz.", key=text_input_key)
-                subheader_prompt_translated = "Subheading generating prompt is : " + translate.translate_text(subheader_prompt, "tr", "en")
-                if(st.button(" Prompt Üret ",key=heading)):
+                subheader_prompt_translated = "Subheading generating prompt is : " + translate.translate_text(
+                    subheader_prompt, "tr", "en")
+                if (st.button(" Prompt Üret ", key=heading)):
                     app.generate_subheading_(heading, subheader_prompt_translated)
                     st.session_state["colored_headings"] = generate_colored_headings(app.headings)
                     st.rerun()
-            
+
         with col2:
             if dot_counter == 0:
                 st.divider()
@@ -48,9 +49,6 @@ def show_headings(colored_headings):
                 indent_string_value,
                 annotation(heading_front_end_value, heading, heading_color),
             )
-
-
-
 
 
 def get_color_by_heading_id(colored_headings, heading_id):
@@ -81,7 +79,7 @@ if not st.session_state["show_result"]:
         if uploaded_file is not None:
             # Dosyayı işleyip başlık ve cümleleri kategorize etme
             app.process_file(uploaded_file, prompt_text)
-            
+
             st.session_state["colored_headings"] = generate_colored_headings(app.headings)
             st.session_state["categorized_result"] = app.processed_out["categorized_dict"]
             st.session_state["sentences"] = app.processed_out["sentences"]
@@ -98,17 +96,12 @@ if not st.session_state["show_result"]:
 # Sonuç sayfası
 else:
     st.title("Kategorize Sonuçları")
-    
+
     colored_headings = st.session_state["colored_headings"]
     col1, col2 = st.columns([1, 2])
     with col1:
         show_headings(colored_headings)
     with col2:
         show_text(colored_headings, st.session_state["sentences"])
-    
 
     # Sayfa iki sütundan oluşuyor: Sol tarafta başlıklar, sağ tarafta ham metin
-
-
-
-    
