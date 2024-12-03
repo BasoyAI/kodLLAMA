@@ -26,14 +26,15 @@ def generate_subheading_(parent_heading_index):
     
     headings[new_subheading_index] = new_subheading_value
     headings_buffer = {
-        0: parent_heading_value,
-        1: new_subheading_value,
+        parent_heading_index: parent_heading_value,
+        new_subheading_index: new_subheading_value,
     }
     only_parent_heading_texts = heading_system.find_sentences_as_objects(processed_out["sentences"], parent_heading_index)
     sentences_buffer = []
     sentences_buffer = categorize_sentences(only_parent_heading_texts, headings_buffer)
     processed_out["sentences"] = heading_system.change_sentence_headings(processed_out["sentences"], sentences_buffer)
     headings = heading_system.sort_headings(headings)
+    print(json.dumps(processed_out, ensure_ascii=False, indent=4))
 
     #rerun front-end
 
@@ -61,7 +62,7 @@ def process_file(uploaded_file_, prompt_text):
 
         processed_out = {
             "categorized_dict": updated_sentences,
-            "sentences": sentences,
+            "sentences": updated_sentences,
             "raw_translated_text": text,  # Ham metni kaydetme
             "headings": headings,
             "type": "audio"

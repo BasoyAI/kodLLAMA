@@ -2,6 +2,7 @@ from ollama import chat
 import json
 
 def generate_subheading(text, promptText, heading, headings: dict):
+    heading_strings = ", ".join(headings.values())
     messages = [
         {
             'role': 'user',
@@ -10,7 +11,7 @@ def generate_subheading(text, promptText, heading, headings: dict):
                 "You need to analyze the text and create the most appropriate subtitle. "
                 "Each title should be no more than five words. Please provide only the subtite as output. "
                 "Do not add number to subtitle or add any comments. "
-                f"You can not create the same with any of these titles: {", ".join(headings.values())}."
+                f"You can not create the same with any of these titles: {heading_strings}."
                 f"You must create a relative subtitle with the main title and text. The main title is: '{heading}'"
                 f"The topic of the provided text and your task is as follows: '{promptText}', and the text is as follows: '{text}'."
             )
@@ -61,6 +62,7 @@ def categorize_sentences(sentences, headings):
     print(f"Indexed Headings: {heading_indices}")
 
     for sentence in sentences:
+        translated_sentence = sentence["translated_text"]
         messages = [
             {
                 'role': 'user',
@@ -68,7 +70,7 @@ def categorize_sentences(sentences, headings):
                     "Choose the index of the heading that this sentence fits. "
                     "You will see the headings below, but you must respond with only the index of the heading. "
                     "Do not make any comments or write other characters.\n\n "
-                    f"Sentence: \"{sentence["translated_text"]}\" \n"
+                    f"Sentence: \"{translated_sentence}\" \n"
                     f"Headings: {json.dumps(heading_indices)}"
                 )
             },
@@ -77,7 +79,7 @@ def categorize_sentences(sentences, headings):
         chosen_index = response['message']['content'].strip()
         print(f"message is:  {messages}  \n  response is: {response}")
         # Check if the index returned by the model is valid
-        if chosen_index in heading_indices:
+        if chosen_index in heading_indices.keys():
             matched_heading = heading_indices[chosen_index]
             index = None
             for key, value in headings.items(): #TODO: change this
@@ -87,7 +89,8 @@ def categorize_sentences(sentences, headings):
         else:
             # If the model returns an invalid index, add it to the "none" category.
             print(f"Error: Index '{chosen_index}' not found. Could not categorize sentence: '{sentence}'")
-            sentence["heading"] = None
+            if not sentence.get("heading"):
+                sentence["heading"] = None
     return sentences
 
 

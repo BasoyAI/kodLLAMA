@@ -33,7 +33,7 @@ def show_headings(colored_headings):
         with col1:
             if(st.button(" -- ",key=heading)):
                 app.generate_subheading_(heading)
-                generate_colored_headings(app.headings)
+                st.session_state["colored_headings"] = generate_colored_headings(app.headings)
                 st.rerun()
             
         with col2:
