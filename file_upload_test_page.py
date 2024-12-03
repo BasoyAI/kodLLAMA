@@ -30,10 +30,14 @@ def show_headings(colored_headings):
         
 
         with col1:
-            if(st.button(" -- ",key=heading)):
-                app.generate_subheading_(heading)
-                st.session_state["colored_headings"] = generate_colored_headings(app.headings)
-                st.rerun()
+            with st.popover(""):
+                text_input_key = str(heading) + "_text_input"
+                subheader_prompt = st.text_input("Alt başlık promptu giriniz.", key=text_input_key)
+                subheader_prompt_translated = "Alt başlık üretme promptu: " + translate.translate_text(subheader_prompt, "tr", "en")
+                if(st.button(" Prompt Üret ",key=heading)):
+                    app.generate_subheading_(heading, subheader_prompt_translated)
+                    st.session_state["colored_headings"] = generate_colored_headings(app.headings)
+                    st.rerun()
             
         with col2:
             if dot_counter == 0:

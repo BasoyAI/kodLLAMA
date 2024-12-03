@@ -16,13 +16,18 @@ processed_out = {
             "type": ""
         }
 
-def generate_subheading_(parent_heading_index):
+def generate_subheading_(parent_heading_index, subheading_prompt):
     global processed_out
     global prompt
     global headings
     new_subheading_index = heading_system.generate_heading_index(headings,parent_heading_index)
     parent_heading_value = headings[parent_heading_index]
-    new_subheading_value = generate_subheading(heading_system.find_sentences(processed_out["sentences"], parent_heading_index), prompt, parent_heading_value, headings)
+    sub_prompt = ""
+    if subheading_prompt is not None or subheading_prompt == "":
+        sub_prompt = subheading_prompt
+    else:
+        sub_prompt = prompt 
+    new_subheading_value = generate_subheading(heading_system.find_sentences(processed_out["sentences"], parent_heading_index), sub_prompt, parent_heading_value, headings)
     
     headings[new_subheading_index] = new_subheading_value
     headings_buffer = {
