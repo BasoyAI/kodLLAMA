@@ -72,32 +72,43 @@ def categorize_sentences(sentences, headings):
 
     for sentence in sentences:
         translated_sentence = sentence["translated_text"]
+        # Prompt: modeli birden fazla başlık döndürmesi için yönlendiriyoruz.
         messages = [
             {
                 'role': 'user',
                 'content': (
-                    "Choose the index of the heading that this sentence fits. "
-                    "You will see the headings below, but you must respond with only the index of the heading. "
-                    "Do not make any comments or write other characters.\n\n "
-                    f"Sentence: \"{translated_sentence}\" \n"
+                    "From the following headings, identify all that are suitable for the given sentence. "
+                    "If the sentence clearly aligns with multiple headings, return all their indices as a comma-separated list (e.g. '1, 3'). "
+                    "If it only aligns with a single heading, return just that one heading index. "
+                    "If the sentence does not match any heading, return 'none'. "
+                    "Do not add extra commentary, explanation, or any other characters.\n\n"
+                    f"Sentence: \"{translated_sentence}\"\n"
                     f"Headings: {json.dumps(heading_indices)}"
                 )
             },
         ]
         response = chat('llama3.2', messages=messages)
-        chosen_index = response['message']['content'].strip()
-        print(f"message is:  {messages}  \n  response is: {response}")
-        # Check if the index returned by the model is valid
-        if chosen_index in heading_indices.keys():
-            matched_heading = heading_indices[chosen_index]
+        chosen_indexes = response['message']['content'].strip()
+
+        # chosen_indexes virgül ile ayrılmış bir liste olacak
+        chosen_indexes = [idx.strip() for idx in chosen_indexes.split(",") if idx.strip() in heading_indices.keys()]
+
+        # Eğer hiç geçerli heading bulunamazsa none'a atayacağız
+        if not chosen_indexes:
+            sentence["headings"] = []
+            sentence["headings"].append(None)
+            continue
+
+        # Birden fazla heading atayalım
+        sentence["headings"] = []
+        for ch_idx in chosen_indexes:
+            matched_heading = heading_indices[ch_idx]
+            # Şimdi matched_heading'i headings sözlüğünde hangi key'e denk geldiğini bulup ekleyelim
             index = None
-            for key, value in headings.items():  #TODO: change this
+            for key, value in headings.items():
                 if value == matched_heading:
                     index = key
-            sentence["heading"] = str(index)
-        else:
-            # If the model returns an invalid index, add it to the "none" category.
-            print(f"Error: Index '{chosen_index}' not found. Could not categorize sentence: '{sentence}'")
-            if not sentence.get("heading"):
-                sentence["heading"] = None
+                    break
+            sentence["headings"].append(str(index))
     return sentences
+

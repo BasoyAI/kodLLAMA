@@ -59,8 +59,20 @@ def get_color_by_heading_id(colored_headings, heading_id):
 
 def show_text(colored_headings, sentences):
     for sentence in sentences:
-        sentence_color = get_color_by_heading_id(colored_headings, sentence["heading"])
-        annotated_text((sentence["text"], str(sentence["heading"]), sentence_color))
+        # sentence["headings"] bir liste
+        if not sentence.get("headings"):
+            # Hiç heading yoksa normal bas
+            annotated_text((sentence["text"], "No Heading", "#FFFFFF"))
+        else:
+            # Birden fazla heading varsa birden fazla annotation ile basabiliriz
+            annotations = []
+            for h_id in sentence["headings"]:
+                if h_id is not None:
+                    sentence_color = get_color_by_heading_id(colored_headings, h_id)
+                    annotations.append((sentence["text"], str(h_id), sentence_color))
+            # annotations birden çok tuple içeriyor, * ile açarak annotated_text'e veriyoruz
+            annotated_text(*annotations)
+
 
 
 # Başlık durumunu kontrol etmek için session_state kullanıyoruz

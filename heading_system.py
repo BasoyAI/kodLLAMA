@@ -74,8 +74,7 @@ def find_sentences(sentence_list, heading_index, language="text"):
         raise ValueError("Invalid language parameter. Use 'text' or 'translated_text'.")
 
     # Filter the sentences that match the heading index
-    return [sentence[language] for sentence in sentence_list if sentence["heading"] == heading_index]
-
+    return [ sentence[language] for sentence in sentence_list if "headings" in sentence and heading_index in sentence["headings"]]
 
 
 def find_sentences_with_sub(sentence_list, heading_list, heading_index, language="text"):
@@ -106,7 +105,7 @@ def find_sentences_with_sub(sentence_list, heading_list, heading_index, language
     ]
 
     # Filter the sentences that match the parent index or any of its subheadings
-    return [sentence[language] for sentence in sentence_list if sentence["heading"] in subheading_indices]
+    return [sentence[language] for sentence in sentence_list if any(h in subheading_indices for h in sentence.get("headings", []))]
 
 def convert_index_for_ai(heading_list):
     """
@@ -145,7 +144,7 @@ def find_sentences_as_objects(sentence_list, heading_index):
         list: List of sentence dictionaries that match the heading_index.
     """
     # Filter the sentences that match the heading index
-    return [sentence for sentence in sentence_list if sentence["heading"] == heading_index]
+    return [sentence for sentence in sentence_list if "headings" in sentence and heading_index in sentence["headings"]]
 
 
 def sort_headings(heading_list):
@@ -171,8 +170,8 @@ def change_sentence_headings(main_sentences_list, buffer_sentences_list):
     for sentence in main_sentences_list:
         for buf_sentence in buffer_sentences_list:
             if sentence["id"] == buf_sentence["id"]:
-                #sentence.update(buf_sentence)
-                sentence["heading"] = buf_sentence["heading"]  
-    
+                # buf_sentence["headings"] bir liste olacak
+                sentence["headings"] = buf_sentence.get("headings", [])
     return main_sentences_list
+
 
