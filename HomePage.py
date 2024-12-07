@@ -1,5 +1,5 @@
 import streamlit as st
-from TextCategorize import process_text
+from TextCategorize import process_text, generate_subheading
 from annotated_text import annotated_text
 import random
 import translate
@@ -34,9 +34,12 @@ if not st.session_state["show_result"]:
             st.session_state["show_result"] = True
             st.session_state["headings"] = result["headings"]
             st.session_state["file_type"] = result["type"]
+            st.session_state["raw_text"] = result["raw_text"]
+            st.session_state["promptText"] = prompt_text
 
         else:
             st.write("Lütfen bir dosya yükleyin.")
+        st.rerun()
 
 # Sonuç sayfası
 else:
@@ -50,18 +53,29 @@ else:
 
         categorized_result = st.session_state["categorized_result"]  # {'Müşteri hiz.': ["fdsg", "dsgggdf"]  }
         headings = st.session_state["headings"]
-        num_titles = len(headings)
+        num_titles = len(headings.keys())
         
         # Her başlık için benzersiz renkler oluşturma
         unique_colors = generate_unique_colors(num_titles)
         
         # Başlık ve renkleri eşleştirmek için bir sözlük oluşturma
         title_colors = {}
-        for i, (title, color) in enumerate(zip(headings, unique_colors), 1):
+        for i, (title, color) in enumerate(zip(headings.keys(), unique_colors), 1):
             title_label = str(i)
             title_colors[title] = (color, title_label)
             annotated_text((translate.translate_text(title, src_lang='en', dest_lang='tr'), title_label, color))
+            #st.button("Alt başlık ekle", key=title_label)
+            for index, subtitle in enumerate(headings[title]):
+                annotated_text((translate.translate_text(subtitle, src_lang='en', dest_lang='tr'), str(i) + "." + str(index+1), color))
+            
+            
+            if(st.button("Alt başlık ekle", key=title_label)):
+                subtitle_label = str(i) + "." + str(len(headings[title]))
+                subHeading = generate_subheading(st.session_state["raw_text"], st.session_state["promptText"], title, headings)
+                #annotated_text((translate.translate_text(title, src_lang='en', dest_lang='tr'), subtitle_label, color))
+                st.rerun()
 
+            st.divider()
     with col2:
         st.subheader("Orijinal Metin")
 

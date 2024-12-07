@@ -1,6 +1,6 @@
 import re
 import whisper
-from moviepy.editor import VideoFileClip
+import moviepy
 import os
 import translate
 
@@ -8,7 +8,7 @@ import translate
 # Function to convert MP4 to MP3
 def convert_to_mp3(file_path):
     if file_path.endswith('.mp4'):
-        clip = VideoFileClip(file_path)
+        clip = moviepy.editor.VideoFileClip(file_path)
         mp3_path = file_path.replace('.mp4', '.mp3')
         clip.audio.write_audiofile(mp3_path)
         return mp3_path
@@ -58,6 +58,7 @@ def format_transcript(file_path) -> list[dict]:
     current_start = transcription[0]["start"]
 
     # Loop over each segment
+    id = 0
     for i, segment in enumerate(transcription):
         # Update the current start time for each new segment
         if not current_sentence:
@@ -85,8 +86,9 @@ def format_transcript(file_path) -> list[dict]:
                 # Append the completed sentence to the final list
                 print(current_sentence.strip())
                 translated_text = translate.translate_text(current_sentence.strip(), "tr", "en")
-                final_sentences.append({"start": current_start, "end": end_time, "text": current_sentence.strip(),
+                final_sentences.append({"id": id, "start": current_start, "end": end_time, "text": current_sentence.strip(),
                                         "translated_text": translated_text})
+                id += 1
                 # Reset for the next sentence
                 current_sentence = ""
                 # Update start time only for the first sentence in the new segment or the first split sentence within this segment
