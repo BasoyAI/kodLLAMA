@@ -1,0 +1,4 @@
+Analyze the text to identify key areas of concern and categorize sentences under appropriate headings.
+Focus on customer complaints, product issues, and website functionality, and create concise, meaningful
+headings that summarize each category. Ensure each sentence is placed only in relevant headings. If a sentence
+fits multiple categories, list all appropriate headings.
