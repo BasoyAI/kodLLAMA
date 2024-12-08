@@ -1,14 +1,7 @@
 import re
 import translate
-import json
-
-from ollama import chat
 from PyPDF2 import PdfReader
 from docx import Document
-import transcript
-import tempfile
-from difflib import get_close_matches
-import process_text
 
 def read_text_from_file(uploaded_file):
     file_type = uploaded_file.name.split(".")[-1].lower()

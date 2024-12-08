@@ -1,119 +1,161 @@
 import streamlit as st
-from annotated_text import annotated_text, annotation
+from annotated_text import annotated_text
 import app
 import random
 import translate
 
-
 def random_color():
     return "#{:06x}".format(random.randint(0, 0xFFFFFF))
 
-
 def generate_colored_headings(headings):
-    colored_headings = {
+    if headings is None:
+        headings = {}
+    return {
         key: [value, random_color()]
         for key, value in headings.items()
     }
 
-    return colored_headings
-
-
-def show_headings(colored_headings):
+def show_headings(colored_headings, prefix="", doc_key=None):
     for heading in colored_headings:
-        col1, col2 = st.columns([1, 9])
+        st.divider()
+
         heading_value = colored_headings[heading][0]
         heading_color = colored_headings[heading][1]
         translated_heading_value = translate.translate_text(heading_value, src_lang='en', dest_lang='tr')
-        dot_counter = heading.count(".")
-        indent_string_value = "-" * dot_counter * 3
-        indent_string_value += ">"
-        heading_front_end_value = heading + ". " + translated_heading_value
+        heading_front_end_value = f"{heading}. {translated_heading_value}"
 
-        with col1:
-            if dot_counter == 0:
-                st.divider()
-            with st.popover(""):
-                text_input_key = str(heading) + "_text_input"
-                subheader_prompt = st.text_input("Alt başlık promptu giriniz.", key=text_input_key)
-                subheader_prompt_translated = "Subheading generating prompt is : " + translate.translate_text(
-                    subheader_prompt, "tr", "en")
-                if (st.button(" Prompt Üret ", key=heading)):
-                    app.generate_subheading_(heading, subheader_prompt_translated)
-                    st.session_state["colored_headings"] = generate_colored_headings(app.headings)
-                    st.rerun()
+        st.markdown(
+            f"<div style='color: {heading_color}; font-weight: bold; font-size: 16px; padding: 5px;'>{heading_front_end_value}</div>",
+            unsafe_allow_html=True
+        )
 
-        with col2:
-            if dot_counter == 0:
-                st.divider()
-            annotated_text(
-                indent_string_value,
-                annotation(heading_front_end_value, heading, heading_color),
-            )
+        # Alt başlık oluşturma
+        with st.expander("Alt başlık oluştur", expanded=False):
+            text_input_key = prefix + str(heading) + "_text_input"
+            subheader_prompt = st.text_input("Alt başlık promptu giriniz.", key=text_input_key)
+            subheader_prompt_translated = "Subheading generating prompt is : " + translate.translate_text(
+                subheader_prompt, "tr", "en")
+            button_key = prefix + heading + "_button"
+            if st.button("Prompt Üret", key=button_key):
+                # Eski belge için doc_key None, yeni belgeler için doc_key örn: "new_doc_1"
+                if doc_key is None:
+                    # Eski belgedeyiz
+                    current_processed_out = st.session_state["processed_out"]
+                    current_headings = st.session_state["headings"]
+                    prompt_text = st.session_state["promptText"]
+                    updated_processed_out, updated_headings = app.generate_subheading_(
+                        heading,
+                        subheader_prompt_translated,
+                        current_processed_out,
+                        current_headings,
+                        prompt_text
+                    )
+                    st.session_state["processed_out"] = updated_processed_out
+                    st.session_state["headings"] = updated_headings
+                    st.session_state["colored_headings"] = generate_colored_headings(updated_headings)
+                else:
+                    # Yeni belge
+                    current_processed_out = st.session_state["new_file_uploaded_dict"][doc_key]
+                    current_headings = current_processed_out["headings"]
+                    prompt_text = st.session_state["promptText"]
+                    updated_processed_out, updated_headings = app.generate_subheading_(
+                        heading,
+                        subheader_prompt_translated,
+                        current_processed_out,
+                        current_headings,
+                        prompt_text
+                    )
+                    st.session_state["new_file_uploaded_dict"][doc_key] = updated_processed_out
+                    st.session_state[f"colored_headings_{doc_key}"] = generate_colored_headings(updated_headings)
 
+                st.rerun()
 
 def get_color_by_heading_id(colored_headings, heading_id):
-    for heading in colored_headings:
-        if heading == heading_id:
-            return colored_headings[heading][1]
-
+    for h in colored_headings:
+        if h == heading_id:
+            return colored_headings[h][1]
 
 def show_text(colored_headings, sentences):
     for sentence in sentences:
-        # sentence["headings"] bir liste
         if not sentence.get("headings"):
-            # Hiç heading yoksa normal bas
             annotated_text((sentence["text"], "No Heading", "#FFFFFF"))
         else:
-            # Birden fazla heading varsa birden fazla annotation ile basabiliriz
             annotations = []
             for h_id in sentence["headings"]:
                 if h_id is not None:
                     sentence_color = get_color_by_heading_id(colored_headings, h_id)
                     annotations.append((sentence["text"], str(h_id), sentence_color))
-            # annotations birden çok tuple içeriyor, * ile açarak annotated_text'e veriyoruz
             annotated_text(*annotations)
 
-
-
-# Başlık durumunu kontrol etmek için session_state kullanıyoruz
 if "show_result" not in st.session_state:
     st.session_state["show_result"] = False
+if "num_new_docs" not in st.session_state:
+    st.session_state["num_new_docs"] = 0
+if "new_file_uploaded_dict" not in st.session_state:
+    st.session_state["new_file_uploaded_dict"] = {}
 
-# Ana sayfa - Dosya yükleme ve Kategorize Et butonu
+st.title("kodLLAMA")
+
 if not st.session_state["show_result"]:
-    # Streamlit arayüzü
-    st.title("Metin Kategorize Uygulaması")
-    # Dosya yükleme alanı
     uploaded_file = st.file_uploader("Bir dosya yükleyin", type=["pdf", "docx", "txt", "mp3", "mp4"])
     prompt_text = st.text_area("Enter your prompt here")
-    # İşlem butonu
+
     if st.button("Kategorize Et"):
         if uploaded_file is not None:
-            # Dosyayı işleyip başlık ve cümleleri kategorize etme
-            app.process_file(uploaded_file, prompt_text)
+            processed_out, headings = app.process_file(uploaded_file, prompt_text)
 
-            st.session_state["colored_headings"] = generate_colored_headings(app.headings)
-            st.session_state["categorized_result"] = app.processed_out["categorized_dict"]
-            st.session_state["sentences"] = app.processed_out["sentences"]
+            st.session_state["processed_out"] = processed_out
+            st.session_state["headings"] = headings
+            st.session_state["colored_headings"] = generate_colored_headings(headings)
+            st.session_state["categorized_result"] = processed_out["categorized_dict"]
+            st.session_state["sentences"] = processed_out["sentences"]
             st.session_state["show_result"] = True
-            st.session_state["headings"] = app.processed_out["headings"]
-            st.session_state["file_type"] = app.processed_out["type"]
-            st.session_state["raw_translated_text"] = app.processed_out["raw_translated_text"]
+            st.session_state["file_type"] = processed_out["type"]
+            st.session_state["raw_translated_text"] = processed_out["raw_translated_text"]
             st.session_state["promptText"] = prompt_text
-
-        else:
-            st.write("Lütfen bir dosya yükleyin.")
-        st.rerun()
-
-# Sonuç sayfası
+            st.rerun()
 else:
-    st.title("Kategorize Sonuçları")
+    base_tabs = ["Eski Belge"]
+    new_doc_tabs = [f"Yeni Belge {i}" for i in range(1, st.session_state["num_new_docs"] + 1)]
+    all_tabs = base_tabs + new_doc_tabs
 
-    colored_headings = st.session_state["colored_headings"]
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        show_headings(colored_headings)
-    with col2:
-        show_text(colored_headings, st.session_state["sentences"])
+    top_col1, top_col2 = st.columns([10, 1])
+    with top_col1:
+        tabs = st.tabs(all_tabs)
+    with top_col2:
+        if st.button("➕"):
+            st.session_state["num_new_docs"] += 1
+            st.rerun()
 
-    # Sayfa iki sütundan oluşuyor: Sol tarafta başlıklar, sağ tarafta ham metin
+    # Eski Belge Tab
+    with tabs[0]:
+        left_col, right_col = st.columns([1, 2])
+        with left_col:
+            show_headings(st.session_state["colored_headings"], prefix="old_", doc_key=None)
+        with right_col:
+            show_text(st.session_state["colored_headings"], st.session_state["sentences"])
+
+    # Yeni Belgeler Tab
+    for i, tab_name in enumerate(new_doc_tabs, start=1):
+        doc_key = f"new_doc_{i}"
+        with tabs[i]:
+            if doc_key not in st.session_state["new_file_uploaded_dict"]:
+                new_uploaded_file = st.file_uploader("Yeni doküman yükleyin", type=["pdf", "docx", "txt", "mp3", "mp4"],
+                                                     key=f"uploader_{doc_key}")
+                if new_uploaded_file is not None:
+                    if st.button("Yeni Dokümanı Kategorize Et", key=f"process_button_{doc_key}"):
+                        processed_out_new, new_headings = app.process_new_file(new_uploaded_file, st.session_state["promptText"],
+                                                                               st.session_state["headings"])
+                        st.session_state["new_file_uploaded_dict"][doc_key] = processed_out_new
+                        st.session_state[f"colored_headings_{doc_key}"] = generate_colored_headings(new_headings)
+                        st.rerun()
+            else:
+                processed_out_new = st.session_state["new_file_uploaded_dict"][doc_key]
+                left_col_new, right_col_new = st.columns([1, 2])
+                with left_col_new:
+                    if f"colored_headings_{doc_key}" not in st.session_state:
+                        st.warning("Başlıklar yüklenemedi. Lütfen belgeyi tekrar yükleyin.")
+                    else:
+                        show_headings(st.session_state[f"colored_headings_{doc_key}"], prefix=f"new_{i}_", doc_key=doc_key)
+                with right_col_new:
+                    show_text(st.session_state[f"colored_headings_{doc_key}"], processed_out_new["sentences"])

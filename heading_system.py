@@ -34,6 +34,9 @@ def generate_heading_index(heading_list, parent_index=None):
     Returns:
         str: A new heading index.
     """
+    if heading_list is None:
+        heading_list = {}
+
     if parent_index:
         # Find all subheadings that start with the given parent index
         subheadings = [key for key in heading_list.keys() if key.startswith(f"{parent_index}.")]
@@ -95,6 +98,10 @@ def find_sentences_with_sub(sentence_list, heading_list, heading_index, language
         :param sentence_list:
         :param heading_list:
     """
+
+    if heading_list is None:
+        heading_list = {}
+
     # Validate the language parameter
     if language not in ["text", "translated_text"]:
         raise ValueError("Invalid language parameter. Use 'text' or 'translated_text'.")
