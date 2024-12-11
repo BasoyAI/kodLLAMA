@@ -2,6 +2,8 @@ from typing import List
 from ollama import chat
 import json
 from langchain_ollama import ChatOllama
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 from pydantic import BaseModel, Field
 
 # Define the structured output schema
@@ -12,6 +14,71 @@ class HeadingsOutput(BaseModel):
 
 llm = ChatOllama(model="llama3.2", temperature=0.1, num_ctx=8192)
 structured_llm = llm.with_structured_output(HeadingsOutput)
+
+
+def chat_response(prompt, text, chat_history):
+    # İlk konuşma için uygun mesajı oluştur
+    if len(chat_history) <= 0:
+        prompt_message = f"""
+            You are an integrated chatbot for a website capable of text analysis. 
+            Users will upload texts to the system and ask you questions about them. 
+            You will analyze the text in depth and provide clear, accurate, and relevant answers to their questions based on the content of the text.
+            \nThe uploaded text is:
+            \n{text}
+            \n\nUser's prompt is:
+            \n{prompt}
+        """
+    else:
+        # Konuşma geçmişi varsa sadece prompt'u kullan
+        prompt_message = prompt
+
+    # Prompt şablonunu tanımla
+    prompt_template = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "Your name is KodLLAMA. You are a chatbot that can analyze documents.",
+            ),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{input}"),
+        ]
+    )
+
+    # Şablonu ve dil modelini birleştirerek zinciri oluştur
+    chain = prompt_template | llm
+
+    # Yapay zekadan yanıt al
+    response = chain.invoke({"input": prompt_message, "chat_history": chat_history})
+    content_value = response.content if hasattr(response, 'content') else str(response)
+
+    # Yanıtın string formatında olduğundan emin ol
+    response = str(response)
+
+    # Mesajları konuşma geçmişine ekle
+    chat_history.append(HumanMessage(content=prompt_message))
+    chat_history.append(AIMessage(content=content_value))
+    print(chat_history)
+    return content_value
+
+def generate_main_heading_(text, promptText, headings: dict):
+    heading_strings = ", ".join(headings.values())
+    messages = [
+        {
+            'role': 'user',
+            'content': (
+                "You are a bot that analyzes texts. Your task is to generate a suitable title for the provided text. "
+                "The title should be no more than five words. Please provide only the subtitle as output. "
+                "Do not add number to subtitle or any comments. "
+                f"You can not create the same with any of these titles: {heading_strings}. "
+                f"The topic of the provided text and your task is as follows: '{promptText}', and the text is: '{text}'."
+            )
+        },
+    ]
+
+    response = chat('llama3.2', messages=messages)
+    created_main_title = response['message']['content'].strip()
+    return created_main_title
+
 
 def generate_subheading(text, promptText, heading, headings: dict):
     heading_strings = ", ".join(headings.values())
@@ -94,3 +161,39 @@ def categorize_sentences(sentences, headings):
                     break
             sentence["headings"].append(str(index))
     return sentences
+
+
+
+def categorize_with_single_heading(sentences, heading, heading_index, headings):
+    for sentence in sentences:
+        translated_sentence = sentence["translated_text"]
+        messages = [
+            {
+                'role': 'user',
+                'content': (
+                    "Evaluate whether the given sentence is specifically and strongly related to the provided heading.\n\n"
+                    f"Heading: \"{heading}\"\n"
+                    f"Other existing headings: {', '.join(headings.keys())}\n\n"
+                    "Guidelines:\n"
+                    "- The sentence should only be assigned to this heading if it is highly relevant and fits clearly under this category.\n"
+                    "- Consider the semantic meaning of the sentence and ensure it does not overlap significantly with other headings.\n"
+                    "- Be selective and assign the sentence only if it directly supports or aligns with the key idea of this heading.\n\n"
+                    "Instructions:\n"
+                    "- Respond with '1' if the sentence is clearly and strongly related to this heading.\n"
+                    "- Respond with '0' if the sentence is not sufficiently relevant or if its relevance is ambiguous.\n"
+                    "- Do not include any additional explanations or commentary.\n\n"
+                    f"Sentence: \"{translated_sentence}\""
+                )
+            },
+        ]
+        response = chat('llama3.2', messages=messages)
+        is_related = response['message']['content'].strip()
+
+        if is_related == "1":
+            if "headings" not in sentence:
+                sentence["headings"] = []
+            sentence["headings"].append(heading_index)
+
+    return sentences
+
+
