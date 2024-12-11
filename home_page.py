@@ -97,10 +97,6 @@ def show_headings(colored_headings, prefix="", doc_key=None):
                 st.session_state["processed_out"] = updated_processed_out
                 st.session_state["headings"] = updated_headings
                 st.session_state["colored_headings"] = generate_colored_headings(updated_headings)
-                print("-----------------------")
-                print(json.dumps(st.session_state["colored_headings"]))
-                print("")
-                print(json.dumps(updated_headings))
             else:
                 current_processed_out = st.session_state["new_file_uploaded_dict"][doc_key]
                 current_headings = current_processed_out["headings"]
@@ -130,14 +126,7 @@ def show_text(colored_headings, sentences):
             annotations = []
             for h_id in sentence["headings"]:
                 sentence_color = get_color_by_heading_id(colored_headings, h_id)
-
-                print(h_id)
-                print(sentence_color)
-                print("*************************************")
-
                 annotations.append((sentence["text"], str(h_id), sentence_color))
-            print("annotations:")
-            print(json.dumps(annotations))
             annotated_text(*annotations)
 
 def show_ai_chat(sentences, headings, doc_key):
@@ -244,7 +233,6 @@ else:
             show_headings(st.session_state["colored_headings"], prefix="old_", doc_key=None)
         with middle_col:
             show_text(st.session_state["colored_headings"], st.session_state["sentences"])
-            print("Eski belge çalıştı")
         with right_col:
             show_ai_chat(st.session_state["sentences"], st.session_state["headings"], 0)
 
@@ -273,7 +261,5 @@ else:
                         show_headings(st.session_state[f"colored_headings_{doc_key}"], prefix=f"new_{i}_", doc_key=doc_key)
                 with middle_col_new:
                     show_text(st.session_state[f"colored_headings_{doc_key}"], processed_out_new["sentences"])
-                    print("Yeni belge çalıştı")
-
                 with right_col_for_ai:
                     show_ai_chat(processed_out_new["sentences"], processed_out_new["headings"], i)

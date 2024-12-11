@@ -5,6 +5,7 @@ from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
 from pydantic import BaseModel, Field
+import random
 
 # Define the structured output schema
 class HeadingsOutput(BaseModel):
@@ -165,35 +166,60 @@ def categorize_sentences(sentences, headings):
 
 
 def categorize_with_single_heading(sentences, heading, heading_index, headings):
-    for sentence in sentences:
-        translated_sentence = sentence["translated_text"]
-        messages = [
-            {
-                'role': 'user',
-                'content': (
-                    "Evaluate whether the given sentence is specifically and strongly related to the provided heading.\n\n"
-                    f"Heading: \"{heading}\"\n"
-                    f"Other existing headings: {', '.join(headings.keys())}\n\n"
-                    "Guidelines:\n"
-                    "- The sentence should only be assigned to this heading if it is highly relevant and fits clearly under this category.\n"
-                    "- Consider the semantic meaning of the sentence and ensure it does not overlap significantly with other headings.\n"
-                    "- Be selective and assign the sentence only if it directly supports or aligns with the key idea of this heading.\n\n"
-                    "Instructions:\n"
-                    "- Respond with '1' if the sentence is clearly and strongly related to this heading.\n"
-                    "- Respond with '0' if the sentence is not sufficiently relevant or if its relevance is ambiguous.\n"
-                    "- Do not include any additional explanations or commentary.\n\n"
-                    f"Sentence: \"{translated_sentence}\""
-                )
-            },
-        ]
-        response = chat('llama3.2', messages=messages)
-        is_related = response['message']['content'].strip()
+    # Cümleleri id ve translated_text ile text_ dictionary'sine atıyoruz
+    text_ = {sentence["id"]: sentence["translated_text"] for sentence in sentences}
+    max_sentence_number = int(len(text_.keys())*20/100)
 
-        if is_related == "1":
+    # AI mesaj formatı
+    messages = [
+    {
+        'role': 'user',
+        'content': (
+            "Determine which sentences are specifically and strongly related to the provided heading. Note that only a few sentences can be appropriate for this heading.\n\n"
+            f"Heading: \"{heading}\"\n"
+            f"Other existing headings: {', '.join(headings.keys())}\n\n"
+            "Guidelines:\n"
+            "- A sentence should only be listed if it is highly relevant and fits clearly under this category.\n"
+            f"- You can not select more than {max_sentence_number} sentences\n"
+            "- Compare this heading with the other existing headings provided. If a sentence fits better under any of the other headings, do not include its ID.\n"
+            "- Be selective and include only sentences that strongly support the key idea of the heading and are more relevant to it than any other heading.\n\n"
+            
+            "Instructions:\n"
+            "- Respond with a comma-separated list of the IDs of the related sentences.\n"
+            "- Do not include any additional explanations or commentary.\n\n"
+            f"Sentences: {json.dumps(text_)}"
+            )
+        },
+    ]
+
+    # AI çağrısı
+    response = chat('llama3.2', messages=messages)
+    print("")
+    print("")
+
+    print("response is: ")
+    print(response)
+    related_ids = response['message']['content'].strip()
+
+    # ID değerlerini işleme
+    related_ids = [int(id.strip()) for id in related_ids.split(",") if id.strip()]
+    if(len(related_ids) > max_sentence_number):
+        # Silinecek eleman sayısını hesapla
+        num_to_remove = len(related_ids)-max_sentence_number
+
+        # Listeden rastgele elemanları seç ve çıkar
+        for _ in range(num_to_remove):
+            related_ids.pop(random.randint(0, len(related_ids) - 1))
+
+    print("")
+    print("")
+    print("related_ids is: ")
+    print(related_ids)
+    # Sentences üzerinde ilgili id'leri güncelleme
+    for sentence in sentences:
+        if sentence["id"] in related_ids:
             if "headings" not in sentence:
                 sentence["headings"] = []
             sentence["headings"].append(heading_index)
 
     return sentences
-
-
